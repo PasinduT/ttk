@@ -1,0 +1,9 @@
+NAME
+  ttkTesting
+SOURCES
+  ttkTesting.cpp
+HEADERS
+  ttkTesting.h
+DEPENDS
+  testing
+  ttkAlgorithm
