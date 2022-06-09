@@ -2,12 +2,19 @@ name: docker_build
 
 on:
   push:
-    branches:
-      - 'dev'
+    # triggered on tag pushes with tags beginning with either "v" or "dev"
+    branch-ignore:
+      - '*'
+    tags:
+      - 'v*'
+      - 'dev*'
+      - '*-*-*'
+      - '*.*.*'
+      - 'docker*'
 
 jobs:
   docker:
-    runs-on: self-hosted
+    runs-on: ubuntu-20.04
     steps:
       -
         name: Set up QEMU
