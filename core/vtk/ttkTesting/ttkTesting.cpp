@@ -165,6 +165,7 @@ int ttkTesting::RequestData(vtkInformation *ttkNotUsed(request),
   this->printMsg("Starting computation...");
   this->printMsg("  Scalar Array: " + std::string(inputArray->GetName()));
   this->printMsg("Number of components: " + std::to_string(inputArray->GetNumberOfComponents()));
+  this->printMsg("Number of values: " + std::to_string(inputArray->GetNumberOfValues()));
 
   // Create an output array that has the same data type as the input array
   // Note: vtkSmartPointers are well documented

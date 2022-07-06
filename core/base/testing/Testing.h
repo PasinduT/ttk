@@ -47,7 +47,8 @@ namespace ttk {
      */
     int preconditionTriangulation(
       ttk::AbstractTriangulation *triangulation) const {
-      return triangulation->preconditionVertexNeighbors();
+      int result = triangulation->preconditionCellTriangles();
+      return result;
     }
 
     /**
@@ -77,47 +78,38 @@ namespace ttk {
       // -----------------------------------------------------------------------
       // Compute Vertex Averages
       // -----------------------------------------------------------------------
-      {
+      
+      criticalPoints_->push_back({0, (char) 0});
 
-        // compute the average of each vertex in parallel
-        ttk::SimplexId nVertices = static_cast<ttk::SimplexId>(triangulation->getNumberOfVertices());
+      this->printMsg("Beginning cell checking");
+      this->printMsg("Number of cells: " +  std::to_string(triangulation->getNumberOfCells()));
+      SimplexId nCells = triangulation->getNumberOfCells();
+      
+      // for (SimplexId i = 40048; i < 40050; i++) {
+      for (SimplexId i = 0; i < nCells; i++) {
+        SimplexId nVertices = triangulation->getCellVertexNumber(i);
+        // this->printMsg("Vertices in Cell #" + std::to_string(i) + ": " + std::to_string(nVertices));
+        // this->printMsg(" Cell #" + std::to_string(i));
+        assert(nVertices == 3);
+        double values[nVertices * 2];
+        SimplexId vertices[nVertices];
 
-        this->printMsg("I was at least here");
+        for (SimplexId j = 0; j < nVertices; ++j) {
+          SimplexId vertexId;
+          triangulation->getCellVertex(i, j, vertexId);
 
-// #ifdef TTK_ENABLE_OPENMP
-// #pragma omp parallel for num_threads(this->threadNumber_)
-// #endif
-        for(ttk::SimplexId i = 0; i < nVertices; i++) {
-          double vi = inputData[3*i];
-          double vj = inputData[3*i + 1];
-          if (isZero(vi) && isZero(vj)) {
-            criticalPoints_->push_back({i, (char) 3});
-          }
-          else {
-            // Check if critical point is inside a cell
-            size_t nNeighbors = triangulation->getVertexNeighborNumber(i);
-            ttk::SimplexId neighborId;
-            int isCriticalPoint = (isZero(vi, 1e-1) && isZero(vj, 1e-1));
-            for(size_t j = 0; j < nNeighbors; j++) {
-              if (isCriticalPoint == 0) break;
-              
-              triangulation->getVertexNeighbor(i, j, neighborId);
-              double ni = inputData[3 * neighborId];
-              double nj = inputData[3 * neighborId + 1];
-              if (!(vi < ni && vj < nj)) {
-                isCriticalPoint = 0;
-              }
-            }
-            if (isCriticalPoint) {
-              criticalPoints_->push_back({i, (char) 3});
-            }
-          }
+          // this->printMsg("Vertex #" + std::to_string(vertexId));
+          values[j * 2] = inputData[3 * vertexId];
+          values[j * 2 + 1] = inputData[3 * vertexId + 1];
+          vertices[j] = vertexId;
+          // this->printMsg("Vertex: " + std::to_string(j) +  ", " +  std::to_string(vertexId) +  ", " +  
+          //   "{" + std::to_string(vi) + ", " + std::to_string(vj) + "}");
         }
-
-        this->printMsg("I was here too");
+        
+        if (pointInTriangle(values[0], values[1], values[2], values[3], values[4], values[5])) {
+          criticalPoints_->push_back({vertices[0], 3});
+        }
       }
-
-      this->printMsg("Not the end");
 
       // ---------------------------------------------------------------------
       // print global performance
@@ -142,7 +134,34 @@ namespace ttk {
     int isZero(const double value, const double thresh=1e-4) const {
       return (value <= thresh && value >= -thresh) ? 1 : 0;
     }
+
+    double det(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+      return vi1 * (vj2 - vj3) + (vi2 * vj3 - vj2 * vi3) - vj1 * (vi2 - vi3);
+    }
     
+    int positive(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+      double val = det(vi1, vj1, vi2, vj2, vi3, vj3);
+      if (val >= 0) return 1;
+      if (val < 0) return -1;
+      this->printMsg("Zero determinant!!");
+      this->printMsg("Values: "   
+            "{" + std::to_string(vi1) + ", " + std::to_string(vj1) + "}" + 
+            "{" + std::to_string(vi2) + ", " + std::to_string(vj2) + "}" + 
+            "{" + std::to_string(vi3) + ", " + std::to_string(vj3) + "}" 
+            );
+      return 0;
+    }
+
+    bool pointInTriangle(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+      int sign = positive(vi1, vj1, vi2, vj2, vi3, vj3);
+      int sign1 = positive(vi1, vj1, vi2, vj2, 0, 0);
+      if (sign1 != sign) return false;
+      int sign2 = -positive(vi1, vj1, vi3, vj3, 0, 0);
+      if (sign2 != sign) return false;
+      int sign3 = positive(vi2, vj2, vi3, vj3, 0, 0);
+      if (sign3 != sign) return false;
+      return true;
+    }
 
   }; // Testing class
 
