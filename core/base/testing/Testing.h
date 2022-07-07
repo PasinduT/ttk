@@ -79,11 +79,13 @@ namespace ttk {
       // Compute Vertex Averages
       // -----------------------------------------------------------------------
       
-      criticalPoints_->push_back({0, (char) 0});
+      // criticalPoints_->push_back({0, (char) 0});
 
       this->printMsg("Beginning cell checking");
       this->printMsg("Number of cells: " +  std::to_string(triangulation->getNumberOfCells()));
       SimplexId nCells = triangulation->getNumberOfCells();
+
+      int n0 = 0, n1 = 0;
       
       // for (SimplexId i = 40048; i < 40050; i++) {
       for (SimplexId i = 0; i < nCells; i++) {
@@ -105,11 +107,23 @@ namespace ttk {
           // this->printMsg("Vertex: " + std::to_string(j) +  ", " +  std::to_string(vertexId) +  ", " +  
           //   "{" + std::to_string(vi) + ", " + std::to_string(vj) + "}");
         }
-        
-        if (pointInTriangle(values[0], values[1], values[2], values[3], values[4], values[5])) {
-          criticalPoints_->push_back({vertices[0], 3});
+
+        // if (!inBoundingBox(values[0], values[1], values[2], values[3], values[4], values[5])) {
+        //   continue;
+        // }
+
+        int ret = pointInTriangle(values[0], values[1], values[2], values[3], values[4], values[5]);
+        if (ret >= 0) {
+          criticalPoints_->push_back({vertices[0], (char) ret});
         }
+
+        if (ret == 0) {
+          n0++;
+        }
+        if (ret == 1) n1++;
       }
+      this->printMsg("N0 #" + std::to_string(n0));
+      this->printMsg("N1 #" + std::to_string(n1));
 
       // ---------------------------------------------------------------------
       // print global performance
@@ -144,23 +158,37 @@ namespace ttk {
       if (val >= 0) return 1;
       if (val < 0) return -1;
       this->printMsg("Zero determinant!!");
-      this->printMsg("Values: "   
-            "{" + std::to_string(vi1) + ", " + std::to_string(vj1) + "}" + 
-            "{" + std::to_string(vi2) + ", " + std::to_string(vj2) + "}" + 
-            "{" + std::to_string(vi3) + ", " + std::to_string(vj3) + "}" 
-            );
+      // this->printMsg("Values: "   
+      //       "{" + std::to_string(vi1) + ", " + std::to_string(vj1) + "}" + 
+      //       "{" + std::to_string(vi2) + ", " + std::to_string(vj2) + "}" + 
+      //       "{" + std::to_string(vi3) + ", " + std::to_string(vj3) + "}" 
+      //       );
       return 0;
     }
 
-    bool pointInTriangle(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+    int pointInTriangle(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
       int sign = positive(vi1, vj1, vi2, vj2, vi3, vj3);
+      // if (sign == 0) return 0;
       int sign1 = positive(vi1, vj1, vi2, vj2, 0, 0);
-      if (sign1 != sign) return false;
+      // if (sign1 == 0) return 0;
       int sign2 = -positive(vi1, vj1, vi3, vj3, 0, 0);
-      if (sign2 != sign) return false;
+      // if (sign2 == 0) return 0;
+      if (sign1 != sign) return -1;
+      if (sign2 != sign) return -1;
       int sign3 = positive(vi2, vj2, vi3, vj3, 0, 0);
-      if (sign3 != sign) return false;
-      return true;
+      if (sign3 != sign) return -1;
+      return 1;
+    }
+
+    inline bool inBoundingBox(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+      double maxX = std::max(vi1, std::max(vi2, vi3));
+      double maxY = std::max(vj1, std::max(vj2, vj3));
+      double minX = std::min(vi1, std::min(vi2, vi3));
+      double minY = std::min(vj1, std::min(vj2, vj3));
+      if (maxX >= 0.0 && maxY >= 0.0 && minY <= 0.0 && minX <= 0.0) {
+        return true;
+      }
+      return false;
     }
 
   }; // Testing class
