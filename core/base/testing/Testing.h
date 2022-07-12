@@ -85,7 +85,9 @@ namespace ttk {
       this->printMsg("Number of cells: " +  std::to_string(triangulation->getNumberOfCells()));
       SimplexId nCells = triangulation->getNumberOfCells();
 
-      int n0 = 0, n1 = 0;
+      criticalPoints_->clear();
+
+      // int n0 = 0, n1 = 0;
       
       // for (SimplexId i = 40048; i < 40050; i++) {
       for (SimplexId i = 0; i < nCells; i++) {
@@ -108,22 +110,16 @@ namespace ttk {
           //   "{" + std::to_string(vi) + ", " + std::to_string(vj) + "}");
         }
 
-        // if (!inBoundingBox(values[0], values[1], values[2], values[3], values[4], values[5])) {
-        //   continue;
-        // }
+        if (!inBoundingBox(values[0], values[1], values[2], values[3], values[4], values[5])) {
+          continue;
+        }
 
         int ret = pointInTriangle(values[0], values[1], values[2], values[3], values[4], values[5]);
         if (ret >= 0) {
           criticalPoints_->push_back({vertices[0], (char) ret});
+          // this->printMsg("Simplex Id: " + std::to_string(i));
         }
-
-        if (ret == 0) {
-          n0++;
-        }
-        if (ret == 1) n1++;
       }
-      this->printMsg("N0 #" + std::to_string(n0));
-      this->printMsg("N1 #" + std::to_string(n1));
 
       // ---------------------------------------------------------------------
       // print global performance
@@ -152,29 +148,48 @@ namespace ttk {
     double det(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
       return vi1 * (vj2 - vj3) + (vi2 * vj3 - vj2 * vi3) - vj1 * (vi2 - vi3);
     }
+
+    inline int sign(const double x) const {
+      if (x < 0) return -1;
+      if (x > 0) return 1;
+      return 0;
+    }
     
     int positive(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
       double val = det(vi1, vj1, vi2, vj2, vi3, vj3);
-      if (val >= 0) return 1;
+      if (val > 0) return 1;
       if (val < 0) return -1;
-      this->printMsg("Zero determinant!!");
+      // this->printMsg("Zero determinant!!");
       // this->printMsg("Values: "   
       //       "{" + std::to_string(vi1) + ", " + std::to_string(vj1) + "}" + 
       //       "{" + std::to_string(vi2) + ", " + std::to_string(vj2) + "}" + 
       //       "{" + std::to_string(vi3) + ", " + std::to_string(vj3) + "}" 
       //       );
-      return 0;
+      // -P(2, 1)                      E(1, 2) 
+      if (vi2 != 0.0) return -sign(vi2);
+      // +P(3, 1)                      E(1, 2) 
+      if (vi3 != 0.0) return sign(vi3);
+      // -P(3, 2)                      E(1, 1) 
+      if (vj3 != 0.0) return -sign(vj3);
+      // +P(2, 2)                      E(1, 1) 
+      if (vj2 != 0.0) return sign(vj2);
+      // -P(3, 1)                      E(2, 2) 
+      if (vi3 != 0.0) return -sign(vi3);
+      // +P(1, 1)                      E(2, 2) 
+      if (vi1 != 0.0) return sign(vi1);
+      // +                             E(1, 1) E(2, 2) 
+      return 1;
     }
 
     int pointInTriangle(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
       int sign = positive(vi1, vj1, vi2, vj2, vi3, vj3);
       // if (sign == 0) return 0;
       int sign1 = positive(vi1, vj1, vi2, vj2, 0, 0);
+      if (sign1 != sign) return -1;
       // if (sign1 == 0) return 0;
       int sign2 = -positive(vi1, vj1, vi3, vj3, 0, 0);
-      // if (sign2 == 0) return 0;
-      if (sign1 != sign) return -1;
       if (sign2 != sign) return -1;
+      // if (sign2 == 0) return 0;
       int sign3 = positive(vi2, vj2, vi3, vj3, 0, 0);
       if (sign3 != sign) return -1;
       return 1;
