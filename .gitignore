@@ -19,6 +19,7 @@ CMakeLists.txt.user
 /build*/
 /install*/
 /ttk_install/
+/ttk-build/
 
 # Generated documentation
 /doc/html
