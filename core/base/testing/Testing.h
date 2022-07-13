@@ -68,12 +68,12 @@ namespace ttk {
       // print horizontal separator
       this->printMsg(ttk::debug::Separator::L1); // L1 is the '=' separator
 
-      // print input parameters in table format
-      this->printMsg({
-        {"#Threads", std::to_string(this->threadNumber_)},
-        {"#Vertices", std::to_string(triangulation->getNumberOfVertices())},
-      });
-      this->printMsg(ttk::debug::Separator::L1);
+      // // print input parameters in table format
+      // this->printMsg({
+      //   {"#Threads", std::to_string(this->threadNumber_)},
+      //   {"#Vertices", std::to_string(triangulation->getNumberOfVertices())},
+      // });
+      // this->printMsg(ttk::debug::Separator::L1);
 
       // -----------------------------------------------------------------------
       // Compute Vertex Averages
@@ -110,11 +110,11 @@ namespace ttk {
           //   "{" + std::to_string(vi) + ", " + std::to_string(vj) + "}");
         }
 
-        if (!inBoundingBox(values[0], values[1], values[2], values[3], values[4], values[5])) {
+        if (!zeroInBoundingBox(values[0], values[1], values[2], values[3], values[4], values[5])) {
           continue;
         }
 
-        int ret = pointInTriangle(values[0], values[1], values[2], values[3], values[4], values[5]);
+        int ret = zeroInTriangle(values[0], values[1], values[2], values[3], values[4], values[5]);
         if (ret >= 0) {
           criticalPoints_->push_back({vertices[0], (char) ret});
           // this->printMsg("Simplex Id: " + std::to_string(i));
@@ -181,7 +181,8 @@ namespace ttk {
       return 1;
     }
 
-    int pointInTriangle(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+    int zeroInTriangle(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+      
       int sign = positive(vi1, vj1, vi2, vj2, vi3, vj3);
       // if (sign == 0) return 0;
       int sign1 = positive(vi1, vj1, vi2, vj2, 0, 0);
@@ -195,7 +196,7 @@ namespace ttk {
       return 1;
     }
 
-    inline bool inBoundingBox(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+    inline bool zeroInBoundingBox(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
       double maxX = std::max(vi1, std::max(vi2, vi3));
       double maxY = std::max(vj1, std::max(vj2, vj3));
       double minX = std::min(vi1, std::min(vi2, vi3));
