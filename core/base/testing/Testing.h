@@ -90,8 +90,8 @@ namespace ttk {
       // int n0 = 0, n1 = 0;
       
       // for (SimplexId i = 40048; i < 40050; i++) {
-      for (SimplexId i = 0; i < nCells; i++) {
-        SimplexId nVertices = triangulation->getCellVertexNumber(i);
+      for (SimplexId id = 0; id < nCells; id++) {
+        SimplexId nVertices = triangulation->getCellVertexNumber(id);
         // this->printMsg("Vertices in Cell #" + std::to_string(i) + ": " + std::to_string(nVertices));
         // this->printMsg(" Cell #" + std::to_string(i));
         assert(nVertices == 3);
@@ -100,7 +100,7 @@ namespace ttk {
 
         for (SimplexId j = 0; j < nVertices; ++j) {
           SimplexId vertexId;
-          triangulation->getCellVertex(i, j, vertexId);
+          triangulation->getCellVertex(id, j, vertexId);
 
           // this->printMsg("Vertex #" + std::to_string(vertexId));
           values[j * 2] = inputData[3 * vertexId];
@@ -114,10 +114,48 @@ namespace ttk {
           continue;
         }
 
-        int ret = zeroInTriangle(values[0], values[1], values[2], values[3], values[4], values[5]);
-        if (ret >= 0) {
+
+        this->printMsg("Simplex Id: " + std::to_string(id));
+
+        int ret = zeroInTriangle(values[0], values[1], values[2], values[3], values[4], values[5], vertices[0], vertices[1], vertices[2]);
+        if (ret > 0) {
           criticalPoints_->push_back({vertices[0], (char) ret});
-          // this->printMsg("Simplex Id: " + std::to_string(i));
+        }
+
+        int i = 0, j = 1, k = 2;
+        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
+        if (ret > 0) {
+          criticalPoints_->push_back({vertices[i], (char) 0});
+        }
+
+        i = 0, j = 2, k = 1;
+        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
+        if (ret > 0) {
+          criticalPoints_->push_back({vertices[i], (char) 1});
+        }
+
+        i = 1, j = 0, k = 2;
+        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
+        if (ret > 0) {
+          criticalPoints_->push_back({vertices[i], (char) 2});
+        }
+
+        i = 1, j = 2, k = 0;
+        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
+        if (ret > 0) {
+          criticalPoints_->push_back({vertices[i], (char) 3});
+        }
+
+        i = 2, j = 0, k = 1;
+        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
+        if (ret > 0) {
+          criticalPoints_->push_back({vertices[i], (char) 4});
+        }
+
+        i = 2, j = 1, k = 0;
+        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
+        if (ret > 0) {
+          criticalPoints_->push_back({vertices[i], (char) 5});
         }
       }
 
@@ -181,7 +219,9 @@ namespace ttk {
       return 1;
     }
 
-    int zeroInTriangle(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+    int zeroInTriangle(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3,
+        const SimplexId id1, const SimplexId id2, const SimplexId id3) const {
+
       
       int sign = positive(vi1, vj1, vi2, vj2, vi3, vj3);
       // if (sign == 0) return 0;
@@ -193,6 +233,7 @@ namespace ttk {
       // if (sign2 == 0) return 0;
       int sign3 = positive(vi2, vj2, vi3, vj3, 0, 0);
       if (sign3 != sign) return -1;
+      this->printMsg("i, j, k: " + std::to_string(id1) + ", " + std::to_string(id2) + ", " + std::to_string(id3));
       return 1;
     }
 
