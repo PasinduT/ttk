@@ -195,8 +195,7 @@ namespace ttk {
     
     int positive(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
       double val = det(vi1, vj1, vi2, vj2, vi3, vj3);
-      if (val > 0) return 1;
-      if (val < 0) return -1;
+      if (val != 0.0) return sign(val);
       // this->printMsg("Zero determinant!!");
       // this->printMsg("Values: "   
       //       "{" + std::to_string(vi1) + ", " + std::to_string(vj1) + "}" + 
@@ -219,10 +218,11 @@ namespace ttk {
       return 1;
     }
 
-    int zeroInTriangle(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3,
-        const SimplexId id1, const SimplexId id2, const SimplexId id3) const {
+    int zeroInTriangle(double vi1, double vj1, double vi2, double vj2, double vi3, double vj3,
+      SimplexId id1, SimplexId id2, SimplexId id3) const {
 
-      
+      // sortByIndex(vi1, vj1, vi2, vj2, vi3, vj3, id1, id2, id3);
+
       int sign = positive(vi1, vj1, vi2, vj2, vi3, vj3);
       // if (sign == 0) return 0;
       int sign1 = positive(vi1, vj1, vi2, vj2, 0, 0);
@@ -235,6 +235,28 @@ namespace ttk {
       if (sign3 != sign) return -1;
       this->printMsg("i, j, k: " + std::to_string(id1) + ", " + std::to_string(id2) + ", " + std::to_string(id3));
       return 1;
+    }
+
+    void sortByIndex (double & vi1, double & vj1, double & vi2, double & vj2, double & vi3, double & vj3,
+      SimplexId & id1, SimplexId & id2, SimplexId & id3) const {
+
+        if (id1 < id2) {
+          std::swap(id1, id2);
+          std::swap(vi1, vi2);
+          std::swap(vj1, vj2);
+        }
+
+        if (id2 < id3) {
+          std::swap(id3, id2);
+          std::swap(vi3, vi2);
+          std::swap(vj3, vj2);
+        }
+
+        if (id1 < id2) {
+          std::swap(id1, id2);
+          std::swap(vi1, vi2);
+          std::swap(vj1, vj2);
+        }
     }
 
     inline bool zeroInBoundingBox(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
