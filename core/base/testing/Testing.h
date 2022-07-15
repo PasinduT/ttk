@@ -117,13 +117,13 @@ namespace ttk {
 
         this->printMsg("Simplex Id: " + std::to_string(id));
 
-        int ret = zeroInTriangle(values[0], values[1], values[2], values[3], values[4], values[5], vertices[0], vertices[1], vertices[2]);
-        if (ret > 0) {
-          criticalPoints_->push_back({vertices[0], (char) ret});
-        }
+        // int ret = zeroInTriangle(values[0], values[1], values[2], values[3], values[4], values[5], vertices[0], vertices[1], vertices[2]);
+        // if (ret > 0) {
+        //   criticalPoints_->push_back({vertices[0], (char) ret});
+        // }
 
         int i = 0, j = 1, k = 2;
-        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
+        int ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
         if (ret > 0) {
           criticalPoints_->push_back({vertices[i], (char) 0});
         }
@@ -193,70 +193,90 @@ namespace ttk {
       return 0;
     }
     
-    int positive(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
+    int positive(double vi1, double vj1, double vi2, double vj2, double vi3, double vj3,
+      SimplexId id1, SimplexId id2, SimplexId id3) const {
+
+      int swaps = sortByIndex(vi1, vj1, vi2, vj2, vi3, vj3, id1, id2, id3);
+      if (swaps % 2 == 1) {
+        swaps = -1;
+      }
+      else {
+        swaps = 1;
+      }
+
       double val = det(vi1, vj1, vi2, vj2, vi3, vj3);
-      if (val != 0.0) return sign(val);
-      // this->printMsg("Zero determinant!!");
-      // this->printMsg("Values: "   
-      //       "{" + std::to_string(vi1) + ", " + std::to_string(vj1) + "}" + 
-      //       "{" + std::to_string(vi2) + ", " + std::to_string(vj2) + "}" + 
-      //       "{" + std::to_string(vi3) + ", " + std::to_string(vj3) + "}" 
-      //       );
+      if (val != 0.0) { this->printMsg("Det: " + std::to_string(swaps * val)); return swaps * sign(val); }
       // -P(2, 1)                      E(1, 2) 
-      if (vi2 != 0.0) return -sign(vi2);
       // +P(3, 1)                      E(1, 2) 
-      if (vi3 != 0.0) return sign(vi3);
+      double temp = vi3 - vi2;
+      if (temp != 0.0) { this->printMsg("First: " + std::to_string(swaps * temp));  return swaps * sign(temp); }
+
       // -P(3, 2)                      E(1, 1) 
-      if (vj3 != 0.0) return -sign(vj3);
       // +P(2, 2)                      E(1, 1) 
-      if (vj2 != 0.0) return sign(vj2);
+      temp = vj2 - vj3;
+      if (temp != 0.0) { this->printMsg("Second: " + std::to_string(swaps * temp)); return swaps * sign(temp); }
+
       // -P(3, 1)                      E(2, 2) 
-      if (vi3 != 0.0) return -sign(vi3);
       // +P(1, 1)                      E(2, 2) 
-      if (vi1 != 0.0) return sign(vi1);
+      temp = vi1 - vi3;
+      if (temp != 0.0) { this->printMsg("Third: " + std::to_string(swaps * temp)); return swaps * sign(temp); }
+
       // +                             E(1, 1) E(2, 2) 
-      return 1;
+      return swaps * 1;
     }
 
     int zeroInTriangle(double vi1, double vj1, double vi2, double vj2, double vi3, double vj3,
       SimplexId id1, SimplexId id2, SimplexId id3) const {
 
-      // sortByIndex(vi1, vj1, vi2, vj2, vi3, vj3, id1, id2, id3);
+      
 
-      int sign = positive(vi1, vj1, vi2, vj2, vi3, vj3);
+      this->printMsg(ttk::debug::Separator::L1);
+      this->printMsg("i, j, k: " + std::to_string(id1) + ", " + std::to_string(id2) + ", " + std::to_string(id3));
+      this->printMsg("Values: " + std::to_string(vi1) + ", " + std::to_string(vj1) + ", " + std::to_string(vi2) + ", " + std::to_string(vj2) + ", " + std::to_string(vi3) + ", " + std::to_string(vj3));
+
+
+      int sign = positive(vi1 + 2, vj1 + 2, vi2 + 2, vj2 + 2, vi3 + 2, vj3 + 2, id1 + 1 + 2, id2 + 1 + 2, id3 + 1 + 2);
       // if (sign == 0) return 0;
-      int sign1 = positive(vi1, vj1, vi2, vj2, 0, 0);
+      int sign1 = positive(vi1 + 2, vj1 + 2, vi2 + 2, vj2 + 2, 0 + 2, 0 + 2, id1 + 1 + 2, id2 + 1 + 2, 0 + 2);
       if (sign1 != sign) return -1;
       // if (sign1 == 0) return 0;
-      int sign2 = -positive(vi1, vj1, vi3, vj3, 0, 0);
+      int sign2 = positive(vi1 + 2, vj1 + 2, 0 + 2, 0 + 2, vi3 + 2, vj3 + 2, id1 + 1 + 2, 0 + 2, id3 + 1 + 2);
       if (sign2 != sign) return -1;
       // if (sign2 == 0) return 0;
-      int sign3 = positive(vi2, vj2, vi3, vj3, 0, 0);
+      int sign3 = positive(0 + 2, 0 + 2, vi2 + 2, vj2 + 2, vi3 + 2, vj3 + 2, 0 + 2, id2 + 1 + 2, id3 + 1 + 2);
       if (sign3 != sign) return -1;
-      this->printMsg("i, j, k: " + std::to_string(id1) + ", " + std::to_string(id2) + ", " + std::to_string(id3));
+
+      this->printMsg("Critical Point!!");
       return 1;
     }
 
-    void sortByIndex (double & vi1, double & vj1, double & vi2, double & vj2, double & vi3, double & vj3,
+    int sortByIndex (double & vi1, double & vj1, double & vi2, double & vj2, double & vi3, double & vj3,
       SimplexId & id1, SimplexId & id2, SimplexId & id3) const {
+
+        int swaps = 0;
 
         if (id1 < id2) {
           std::swap(id1, id2);
           std::swap(vi1, vi2);
           std::swap(vj1, vj2);
+          swaps++;
         }
 
         if (id2 < id3) {
           std::swap(id3, id2);
           std::swap(vi3, vi2);
           std::swap(vj3, vj2);
+          swaps++;
         }
 
         if (id1 < id2) {
           std::swap(id1, id2);
           std::swap(vi1, vi2);
           std::swap(vj1, vj2);
+          swaps++;
         }
+
+        return swaps;
     }
 
     inline bool zeroInBoundingBox(const double vi1, const double vj1, const double vi2, const double vj2, const double vi3, const double vj3) const {
