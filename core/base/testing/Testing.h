@@ -204,6 +204,8 @@ namespace ttk {
         swaps = 1;
       }
 
+      this->printMsg("Swaps: " + std::to_string(swaps));
+
       double val = det(vi1, vj1, vi2, vj2, vi3, vj3);
       if (val != 0.0) { this->printMsg("Det: " + std::to_string(swaps * val)); return swaps * sign(val); }
       // -P(2, 1)                      E(1, 2) 
@@ -235,15 +237,15 @@ namespace ttk {
       this->printMsg("Values: " + std::to_string(vi1) + ", " + std::to_string(vj1) + ", " + std::to_string(vi2) + ", " + std::to_string(vj2) + ", " + std::to_string(vi3) + ", " + std::to_string(vj3));
 
 
-      int sign = positive(vi1 + 2, vj1 + 2, vi2 + 2, vj2 + 2, vi3 + 2, vj3 + 2, id1 + 1 + 2, id2 + 1 + 2, id3 + 1 + 2);
+      int sign = positive(2*(vi1 + 2), 2*(vj1 + 2), 2*(vi2 + 2), 2*(vj2 + 2), 2*(vi3 + 2), 2*(vj3 + 2), id1, id2, id3);
       // if (sign == 0) return 0;
-      int sign1 = positive(vi1 + 2, vj1 + 2, vi2 + 2, vj2 + 2, 0 + 2, 0 + 2, id1 + 1 + 2, id2 + 1 + 2, 0 + 2);
+      int sign1 = positive(2*(vi1 + 2), 2*(vj1 + 2), 2*(vi2 + 2), 2*(vj2 + 2), 2*(0 + 2), 2*(0 + 2), id1, id2, 5);
       if (sign1 != sign) return -1;
       // if (sign1 == 0) return 0;
-      int sign2 = positive(vi1 + 2, vj1 + 2, 0 + 2, 0 + 2, vi3 + 2, vj3 + 2, id1 + 1 + 2, 0 + 2, id3 + 1 + 2);
+      int sign2 = positive(2*(vi1 + 2), 2*(vj1 + 2), 2*(0 + 2), 2*(0 + 2), 2*(vi3 + 2), 2*(vj3 + 2), id1, 5, id3);
       if (sign2 != sign) return -1;
       // if (sign2 == 0) return 0;
-      int sign3 = positive(0 + 2, 0 + 2, vi2 + 2, vj2 + 2, vi3 + 2, vj3 + 2, 0 + 2, id2 + 1 + 2, id3 + 1 + 2);
+      int sign3 = positive(2*(0 + 2), 2*(0 + 2), 2*(vi2 + 2), 2*(vj2 + 2), 2*(vi3 + 2), 2*(vj3 + 2), 5, id2, id3);
       if (sign3 != sign) return -1;
 
       this->printMsg("Critical Point!!");
@@ -255,21 +257,21 @@ namespace ttk {
 
         int swaps = 0;
 
-        if (id1 < id2) {
+        if (id1 > id2) {
           std::swap(id1, id2);
           std::swap(vi1, vi2);
           std::swap(vj1, vj2);
           swaps++;
         }
 
-        if (id2 < id3) {
+        if (id2 > id3) {
           std::swap(id3, id2);
           std::swap(vi3, vi2);
           std::swap(vj3, vj2);
           swaps++;
         }
 
-        if (id1 < id2) {
+        if (id1 > id2) {
           std::swap(id1, id2);
           std::swap(vi1, vi2);
           std::swap(vj1, vj2);
