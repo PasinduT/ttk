@@ -32,8 +32,16 @@ namespace ttk {
   public:
     Testing();
 
+    struct CriticalPointCell {
+      ttk::SimplexId vertex1;
+      ttk::SimplexId vertex2;
+      ttk::SimplexId vertex3;
+      char criticalType;
+    };
+
+
     inline void
-      setOutput(std::vector<std::pair<ttk::SimplexId, char>> *criticalPoints) {
+      setOutput(std::vector<CriticalPointCell> *criticalPoints) {
       criticalPoints_ = criticalPoints;
     }
 
@@ -115,47 +123,11 @@ namespace ttk {
         }
 
 
-        this->printMsg("Simplex Id: " + std::to_string(id));
+        // this->printMsg("Simplex Id: " + std::to_string(id));
 
-        // int ret = zeroInTriangle(values[0], values[1], values[2], values[3], values[4], values[5], vertices[0], vertices[1], vertices[2]);
-        // if (ret > 0) {
-        //   criticalPoints_->push_back({vertices[0], (char) ret});
-        // }
-
-        int i = 0, j = 1, k = 2;
-        int ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
+        int ret = zeroInTriangle(values[0], values[1], values[2], values[3], values[4], values[5], vertices[0], vertices[1], vertices[2]);
         if (ret > 0) {
-          criticalPoints_->push_back({vertices[i], (char) 0});
-        }
-
-        i = 0, j = 2, k = 1;
-        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
-        if (ret > 0) {
-          criticalPoints_->push_back({vertices[i], (char) 1});
-        }
-
-        i = 1, j = 0, k = 2;
-        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
-        if (ret > 0) {
-          criticalPoints_->push_back({vertices[i], (char) 2});
-        }
-
-        i = 1, j = 2, k = 0;
-        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
-        if (ret > 0) {
-          criticalPoints_->push_back({vertices[i], (char) 3});
-        }
-
-        i = 2, j = 0, k = 1;
-        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
-        if (ret > 0) {
-          criticalPoints_->push_back({vertices[i], (char) 4});
-        }
-
-        i = 2, j = 1, k = 0;
-        ret = zeroInTriangle(values[2 * i], values[2 * i + 1], values[2 * j], values[2 * j + 1], values[2 * k], values[2 * k + 1], vertices[i], vertices[j], vertices[k]);
-        if (ret > 0) {
-          criticalPoints_->push_back({vertices[i], (char) 5});
+          criticalPoints_->push_back({vertices[0], vertices[1], vertices[2], (char) ret});
         }
       }
 
@@ -176,7 +148,7 @@ namespace ttk {
       return 1; // return success
     }
   protected:
-    std::vector<std::pair<ttk::SimplexId, char>> * criticalPoints_;
+    std::vector<CriticalPointCell> * criticalPoints_;
 
   private:
     int isZero(const double value, const double thresh=1e-4) const {

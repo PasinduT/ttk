@@ -125,5 +125,5 @@ protected:
                   vtkInformationVector *outputVector) override;
 
 private:
-  std::vector<std::pair<ttk::SimplexId, char>> criticalPoints_;
+  std::vector<CriticalPointCell> criticalPoints_;
 };
