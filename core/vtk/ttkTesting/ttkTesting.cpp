@@ -208,30 +208,42 @@ int ttkTesting::RequestData(vtkInformation *ttkNotUsed(request),
   // outputDataSet->ShallowCopy(inputDataSet);
   vtkNew<vtkPoints> pointSet{};
   vtkNew<vtkUnsignedCharArray> criticalTypeArray;
-  vtkNew<vtkDoubleArray> valuesArray;
+  // vtkNew<vtkDoubleArray> valuesArray;
   criticalTypeArray->SetNumberOfComponents(1);
   criticalTypeArray->SetName("Critical Type");
-  valuesArray->SetNumberOfComponents(3);
-  valuesArray->SetName("Values");
+  // valuesArray->SetNumberOfComponents(3);
+  // valuesArray->SetName("Values");
 
   pointSet->SetNumberOfPoints(criticalPoints_.size());
   criticalTypeArray->SetNumberOfTuples(criticalPoints_.size());
-  valuesArray->SetNumberOfTuples(criticalPoints_.size());
+  // valuesArray->SetNumberOfTuples(criticalPoints_.size());
 
   for (size_t i = 0; i < criticalPoints_.size(); ++i) {
-    auto some = criticalPoints_[i];
+    // id of the cell, critical type
+    CriticalPointCell criticalPoint = criticalPoints_[i];
+    std::array<double, 3> res{};
     std::array<double, 3> p{};
-    inputDataSet->GetPoint(some.first, p.data());
-    pointSet->SetPoint(i, p.data());
-    criticalTypeArray->SetTuple1(i, static_cast<unsigned char>(some.second));
+    // criticalPoint.first = cellID
+    inputDataSet->GetPoint(criticalPoint.vertex1, p.data());
+    res[0] = 0.3333333 * p[0]; res[1] = 0.3333333 * p[1]; res[2] = 0.3333333 * p[2];
+    // res[0] = p[0]; res[1] = p[1]; res[2] = p[2];
 
-    double * nothing = inputArray->GetTuple3(some.first);
-    valuesArray->SetTuple3(i, nothing[0], nothing[1], nothing[2]);
+    inputDataSet->GetPoint(criticalPoint.vertex2, p.data());
+    res[0] += 0.3333333 * p[0]; res[1] += 0.3333333 * p[1]; res[2] += 0.3333333 * p[2];
+
+    inputDataSet->GetPoint(criticalPoint.vertex3, p.data());
+    res[0] += 0.3333333 * p[0]; res[1] += 0.3333333 * p[1]; res[2] += 0.3333333 * p[2];
+
+    pointSet->SetPoint(i, res.data());
+    criticalTypeArray->SetTuple1(i, static_cast<unsigned char>(criticalPoint.criticalType));
+
+    // double * nothing = inputArray->GetTuple3(criticalPoint.first);
+    // valuesArray->SetTuple3(i, nothing[0], nothing[1], nothing[2]);
   }
 
   ttkUtils::CellVertexFromPoints(outputDataSet, pointSet);
   outputDataSet->GetPointData()->AddArray(criticalTypeArray);
-  outputDataSet->GetPointData()->AddArray(valuesArray);
+  // outputDataSet->GetPointData()->AddArray(valuesArray);
 
   // add to the output point data the computed output array
   // outputDataSet->GetPointData()->AddArray(outputArray);
