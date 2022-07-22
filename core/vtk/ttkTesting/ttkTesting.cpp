@@ -197,8 +197,8 @@ int ttkTesting::RequestData(vtkInformation *ttkNotUsed(request),
                          (TTK_TT *)triangulation->getData())));
 
   // On error cancel filter execution
-  // if(status != 1)
-  //   return 0;
+  if(status != 1)
+    return 0;
 
   // Get output vtkDataSet (which was already instantiated based on the
   // information provided by FillOutputPortInformation)
