@@ -104,6 +104,7 @@ namespace ttk {
         // this->printMsg(" Cell #" + std::to_string(i));
         assert(nVertices == 3);
         double values[nVertices * 2];
+        float locations[nVertices * 3];
         SimplexId vertices[nVertices];
 
         for (SimplexId j = 0; j < nVertices; ++j) {
@@ -114,6 +115,7 @@ namespace ttk {
           values[j * 2] = inputData[3 * vertexId];
           values[j * 2 + 1] = inputData[3 * vertexId + 1];
           vertices[j] = vertexId;
+          triangulation->getVertexPoint(vertexId, locations[j * 3], locations[j * 3 + 1], locations[j * 3 + 2]);
           // this->printMsg("Vertex: " + std::to_string(j) +  ", " +  std::to_string(vertexId) +  ", " +  
           //   "{" + std::to_string(vi) + ", " + std::to_string(vj) + "}");
         }
@@ -206,16 +208,18 @@ namespace ttk {
 
       int sign = positive(vi1, vj1, vi2, vj2, vi3, vj3, id1, id2, id3);
       // if (sign == 0) return 0;
-      int sign1 = positive(vi1, vj1, vi2, vj2, 0, 0, id1, id2, id3);
+      int sign1 = positive(vi1, vj1, vi2, vj2, 0, 0, id1 + 1, id2 + 1, 0);
       if (sign1 != sign) return -1;
       // if (sign1 == 0) return 0;
-      int sign2 = positive(vi1, vj1, 0, 0, vi3, vj3, id1, id2, id3);
+      int sign2 = positive(vi1, vj1, 0, 0, vi3, vj3, id1 + 1, 0, id3 + 1);
       if (sign2 != sign) return -1;
       // if (sign2 == 0) return 0;
-      int sign3 = positive(0, 0, vi2, vj2, vi3, vj3, id1, id2, id3);
+      int sign3 = positive(0, 0, vi2, vj2, vi3, vj3, 0, id2 + 1, id3 + 1);
       if (sign3 != sign) return -1;
 
       this->printMsg("Critical Point!!");
+
+      // if (positive())
       return 1;
     }
 
@@ -244,6 +248,8 @@ namespace ttk {
           swaps++;
         }
       }
+
+      
 
       if (swaps % 2 == 1) {
         return -1;
