@@ -127,9 +127,11 @@ namespace ttk {
 
         // this->printMsg("Simplex Id: " + std::to_string(id));
 
-        int ret = zeroInTriangle(values[0], values[1], values[2], values[3], values[4], values[5], vertices[0], vertices[1], vertices[2]);
-        if (ret > 0) {
-          criticalPoints_->push_back({vertices[0], vertices[1], vertices[2], (char) ret});
+        int ret = zeroInTriangle(values[0], values[1], values[2], values[3], values[4], values[5], 
+          locations[0], locations[1], locations[3], locations[4], locations[6], locations[7],
+          vertices[0], vertices[1], vertices[2]);
+        if (ret != 0) {
+          criticalPoints_->push_back({vertices[0], vertices[1], vertices[2], (char) (ret + 1)});
         }
       }
 
@@ -197,6 +199,7 @@ namespace ttk {
     }
 
     int zeroInTriangle(double vi1, double vj1, double vi2, double vj2, double vi3, double vj3,
+      double ai1, double aj1, double ai2, double aj2, double ai3, double aj3,
       SimplexId id1, SimplexId id2, SimplexId id3) const {
 
       
@@ -209,17 +212,18 @@ namespace ttk {
       int sign = positive(vi1, vj1, vi2, vj2, vi3, vj3, id1, id2, id3);
       // if (sign == 0) return 0;
       int sign1 = positive(vi1, vj1, vi2, vj2, 0, 0, id1 + 1, id2 + 1, 0);
-      if (sign1 != sign) return -1;
+      if (sign1 != sign) return 0;
       // if (sign1 == 0) return 0;
       int sign2 = positive(vi1, vj1, 0, 0, vi3, vj3, id1 + 1, 0, id3 + 1);
-      if (sign2 != sign) return -1;
+      if (sign2 != sign) return 0;
       // if (sign2 == 0) return 0;
       int sign3 = positive(0, 0, vi2, vj2, vi3, vj3, 0, id2 + 1, id3 + 1);
-      if (sign3 != sign) return -1;
+      if (sign3 != sign) return 0;
 
       this->printMsg("Critical Point!!");
 
-      // if (positive())
+      int sign4 = positive(ai1, aj1, ai2, aj2, ai3, aj3, id1, id2, id3);
+      if (sign4 != sign) return -1;
       return 1;
     }
 
