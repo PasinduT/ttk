@@ -1,0 +1,9 @@
+NAME
+  ttkCombinatorialVectorField
+SOURCES
+  ttkCombinatorialVectorField.cpp
+HEADERS
+  ttkCombinatorialVectorField.h
+DEPENDS
+  combinatorialVectorField
+  ttkAlgorithm
